@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: learn-room
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: learn-room
+  template:
+    metadata:
+      labels:
+        app: learn-room
+    spec:
+      containers:
+        - name: front-end
+          image: nadamankai/learn-room:frontend
+          ports:
+            - containerPort: 80
+        - name: back-end
+          image: nadamankai/learn-room:backend
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DB_HOST
+              value: "aws-0-eu-central-1.pooler.supabase.com"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: "postgres.svrgvowmtumytoypubvn"
+            - name: DB_PASSWORD
+              value: "lerarn-room1"
+            - name: DB_NAME
+              value: "postgres"
+            - name: salt
+              value: "$2b$10$4SpY2UhZFZFAgqX/GRlWze"
+            - name: JWT_SECRET_KEY
+              value: "4ds6b6rgfd465h4ge6dw54hfv6br4dv6vkjdvskwc"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: learn-room-backend-service  # Name of the service
+spec:
+  selector:
+    app: learn-room  # Selector to match pods with the "app: learn-room" label
+  ports:
+    - protocol: TCP
+      port: 80  # External port for the service (users access here)
+      targetPort: 3000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: learn-room-frontend-service
+spec:
+  selector:
+    app: learn-room
+  ports:
+    - protocol: TCP
+      port: 80  # External port for users to access the front-end
+      targetPort: 80
